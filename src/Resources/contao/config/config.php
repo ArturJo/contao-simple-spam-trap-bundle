@@ -5,7 +5,12 @@ $GLOBALS['TL_HOOKS']['prepareFormData'][] = [
     'onPrepareFormData'
 ];
 
-$GLOBALS['TL_HOOKS']['compileFormFields'][] = [
+$GLOBALS['TL_HOOKS']['loadFormField'][] = [
     \SolidWork\ContaoSimpleSpamTrapBundle\EventListener\FormSpamListener::class,
-    'onCompileFormFields'
+    'onLoadFormField'
 ];
+
+// CSS für Honeypot-Feld laden
+if (TL_MODE === 'FE') {
+    $GLOBALS['TL_CSS'][] = 'bundles/contaosimplespamtrap/css/spam-trap.css|static';
+}
