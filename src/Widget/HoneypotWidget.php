@@ -9,7 +9,7 @@ class HoneypotWidget extends Widget
     /**
      * Template für das Widget
      */
-    protected $strTemplate = 'form_widget';
+    protected $strTemplate = 'form_honeypot';
 
     /**
      * CSS-Klasse für das Widget
