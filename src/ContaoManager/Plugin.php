@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace SolidWork\ContaoSimpleSpamTrapBundle\ContaoManager;
 
 use Contao\CoreBundle\ContaoCoreBundle;
@@ -12,14 +10,11 @@ use SolidWork\ContaoSimpleSpamTrapBundle\ContaoSimpleSpamTrapBundle;
 
 class Plugin implements BundlePluginInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getBundles(ParserInterface $parser): array
     {
         return [
             BundleConfig::create(ContaoSimpleSpamTrapBundle::class)
-                ->setLoadAfter([ContaoCoreBundle::class])
+                ->setLoadAfter([ContaoCoreBundle::class]),
         ];
     }
 }

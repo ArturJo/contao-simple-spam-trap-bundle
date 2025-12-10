@@ -7,66 +7,77 @@ use Contao\Widget;
 class TimestampWidget extends Widget
 {
     /**
-     * Template für das Widget
+     * Template.
+     *
+     * @var string
      */
     protected $strTemplate = 'form_timestamp';
 
     /**
-     * CSS-Klasse für das Widget
+     * The widget should be submitted and validated.
+     *
+     * @var bool
      */
-    protected $strClass = 'widget widget-hidden';
+    protected $blnSubmitInput = true;
 
     /**
-     * Minimale Wartezeit in Sekunden
+     * CSS class.
+     *
+     * @var string
      */
-    private $minSeconds = 8;
+    protected $strClass = 'widget widget-timestamp';
 
     /**
-     * Generiert das HTML für das Zeitstempel-Feld
+     * Minimum number of seconds between form display and submit.
+     *
+     * @var int
      */
-    public function generate()
+    protected $minSeconds = 8;
+
+    /**
+     * Map the custom DCA field "minTime" to the internal property.
+     *
+     * {@inheritdoc}
+     */
+    public function __set($key, $value): void
+    {
+        if ('minTime' === $key) {
+            $this->minSeconds = (int) $value;
+        }
+
+        parent::__set($key, $value);
+    }
+
+    /**
+     * Validate the timestamp.
+     */
+    public function validate(): void
+    {
+        $submitted = (int) $this->getPost($this->strName);
+        $now = time();
+
+        if (!$submitted || ($now - $submitted) < $this->minSeconds) {
+            $this->addError(
+                $GLOBALS['TL_LANG']['ERR']['timestamp']
+                ?? sprintf('Sie haben das Formular zu schnell abgeschickt. Bitte warten Sie mindestens %d Sekunden.', $this->minSeconds)
+            );
+        }
+
+        parent::validate();
+    }
+
+    /**
+     * Generate a hidden field with the current timestamp.
+     *
+     * @return string
+     */
+    public function generate(): string
     {
         return sprintf(
             '<input type="hidden" name="%s" id="ctrl_%s" value="%s">',
             $this->strName,
             $this->strId,
-            time() // Aktueller Zeitstempel
+            time()
         );
-    }
-
-    /**
-     * Validierung - prüft ob genug Zeit vergangen ist
-     */
-    public function validate()
-    {
-        $timestamp = (int)$this->getPost($this->strName);
-        $currentTime = time();
-
-        // Hole die konfigurierte Mindestzeit (falls gesetzt)
-        if (isset($this->minTime) && $this->minTime > 0) {
-            $this->minSeconds = (int)$this->minTime;
-        }
-
-        // Prüfe ob das Formular zu schnell abgeschickt wurde
-        if (!$timestamp || ($currentTime - $timestamp) < $this->minSeconds) {
-            $this->addError(sprintf(
-                'Sie haben das Formular zu schnell abgeschickt. Bitte warten Sie mindestens %d Sekunden.',
-                $this->minSeconds
-            ));
-        }
-
-        return parent::validate();
-    }
-
-    /**
-     * Setter für die Mindestzeit
-     */
-    public function __set($key, $value)
-    {
-        if ($key === 'minTime') {
-            $this->minSeconds = (int)$value;
-        }
-
-        parent::__set($key, $value);
     }
 }

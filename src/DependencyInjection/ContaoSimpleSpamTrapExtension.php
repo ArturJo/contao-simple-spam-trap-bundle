@@ -7,7 +7,8 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 
 class ContaoSimpleSpamTrapExtension extends Extension
 {
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
+        // No services required for this simple bundle.
     }
 }

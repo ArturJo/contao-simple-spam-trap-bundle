@@ -7,41 +7,51 @@ use Contao\Widget;
 class HoneypotWidget extends Widget
 {
     /**
-     * Template für das Widget
+     * Template.
+     *
+     * @var string
      */
     protected $strTemplate = 'form_honeypot';
 
     /**
-     * CSS-Klasse für das Widget
+     * The widget should be submitted and validated.
+     *
+     * @var bool
      */
-    protected $strClass = 'widget widget-text widget-honeypot';
+    protected $blnSubmitInput = true;
 
     /**
-     * Generiert das HTML für das Honeypot-Feld
+     * CSS class.
+     *
+     * @var string
      */
-    public function generate()
+    protected $strClass = 'widget widget-honeypot';
+
+    /**
+     * Generate the honeypot field.
+     *
+     * @return string
+     */
+    public function generate(): string
     {
         return sprintf(
-            '<input type="text" name="%s" id="ctrl_%s" class="hp-field" value="" ' .
-            'style="position:absolute !important; left:-9999px !important; width:1px !important; height:1px !important; opacity:0 !important;" ' .
-            'tabindex="-1" autocomplete="off" aria-hidden="true">',
+            '<input type="text" name="%s" id="ctrl_%s" class="hp-field" value="" autocomplete="off" tabindex="-1" aria-hidden="true">',
             $this->strName,
             $this->strId
         );
     }
 
     /**
-     * Validierung (immer leer lassen - wenn nicht leer = Spam!)
+     * Validate: the field must stay empty.
      */
-    public function validate()
+    public function validate(): void
     {
         $value = $this->getPost($this->strName);
 
-        // Wenn das Feld ausgefüllt ist = Spam erkannt
-        if ($value !== '' && $value !== null) {
-            $this->addError('Spamverdacht: Das Formular konnte nicht gesendet werden.');
+        if ('' !== (string) $value) {
+            $this->addError($GLOBALS['TL_LANG']['ERR']['honeypot'] ?? 'Spamverdacht: Das Formular konnte nicht gesendet werden.');
         }
 
-        return parent::validate();
+        parent::validate();
     }
 }
