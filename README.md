@@ -1,54 +1,64 @@
 # Contao Simple Spam Trap Bundle
 
-**Kurzbeschreibung:** Dieses Bundle erweitert den Contao-Formulargenerator um zwei einfache, aber effektive Spam-Schutzmechanismen:
+Kurzbeschreibung: Dieses Bundle ergänzt Contao-Formulare um zwei einfache, aber effektive Spam-Schutzmechanismen:
 
-- Zeitbasierter Schutz (Zeitfalle): Ein Formular darf erst nach X Sekunden abgesendet werden.
+- Zeitfalle (Timestamp): Das Formular darf erst nach einer Mindestzeit abgeschickt werden.
 - Honeypot: Ein verstecktes Eingabefeld, das echte Nutzer nicht ausfüllen. Bots tappen hinein und werden blockiert.
 
-## Funktionen
-- Aktivierbarer 8-Sekunden-Standard mit frei wählbarer Zeitspanne
-- Automatisches Hinzufügen eines versteckten Zeitstempelfeldes
-- Automatisches Hinzufügen eines Honeypot-Feldes
-- Benutzerfreundliche Fehlermeldungen im Frontend (deutsch)
+## Funktionsumfang
+- Zeitbasierter Schutz mit Standardwert 8 Sekunden (serverseitige Prüfung)
+- Honeypot-Feld mit Barrierefreiheits-Vorkehrungen (tabindex="-1", aria-hidden)
+- Deutsche Standard-Fehlermeldungen
+- Frontend-CSS wird automatisch eingebunden: `bundles/contaosimplespamtrap/css/spam-trap.css`
 
 ## Installation
-Mit Composer
+Mit Composer:
+
     composer require solidwork/contao-simple-spam-trap-bundle
 
-Mit dem Contao Manager
-- Paket "solidwork/contao-simple-spam-trap-bundle" suchen und installieren
-- Anschließend den Contao Manager ausführen (Abhängigkeiten installieren) und den Datenbank-Assistenten durchlaufen lassen, falls erforderlich
+Mit dem Contao Manager:
+- Paket „solidwork/contao-simple-spam-trap-bundle“ suchen und installieren
+- Anschließend den Contao Manager ausführen (Abhängigkeiten installieren)
 
-Voraussetzungen laut composer.json
+Voraussetzungen laut composer.json:
 - PHP: ^7.4 oder ^8.0
 - Contao Core Bundle: ^4.13
 
-## Verwendung in Contao
-1. Im Backend unter Inhalte → Formulargenerator ein Formular öffnen.
-2. In der Standard-Palette erscheint der neue Abschnitt "Einfacher Spam-Schutz" (simple_spam_legend) mit folgenden Feldern:
-   - "Zeitbasierten Spam-Schutz aktivieren" (enable_time_spam)
-   - "Zeit in Sekunden" (time_spam_seconds)
-   - "Honeypot aktivieren" (enable_honeypot_spam)
-3. Gewünschte Optionen aktivieren und speichern.
+## Verwendung in Contao (Formulargenerator)
+Dieses Bundle registriert zwei zusätzliche Formularfeld-Typen, die Sie Ihrem Formular manuell hinzufügen können:
 
-Das Bundle fügt beim Rendern automatisch folgende Felder hinzu:
-- form_start_timestamp (hidden)
-- hp_field (text, versteckt)
+1. Feldtyp „Zeitbasierter Spam-Schutz“ (intern: TL_FFL['timestamp'])
+   - Rendert ein verstecktes Feld mit dem aktuellen Zeitstempel.
+   - Bei der Validierung wird geprüft, ob zwischen Anzeigen des Formulars und Absenden mindestens 8 Sekunden vergangen sind.
 
-Bei Verstößen erhält der Nutzer Meldungen wie:
-- "Sie haben das Formular zu schnell abgeschickt. Bitte warten Sie mindestens X Sekunden."
-- "Spamverdacht: Das Formular konnte nicht gesendet werden."
+2. Feldtyp „Honeypot-Spam-Schutz“ (intern: TL_FFL['honeypot'])
+   - Rendert ein unsichtbares Textfeld. Bleibt es leer, ist alles ok. Enthält es Text, wird das Formular als Spam abgewiesen.
 
-## Hinweise und Best Practices
-- CSS: Das Honeypot-Feld erhält die Klasse "hp" und wird zusätzlich inline mit display:none versteckt. Achten Sie darauf, dieses Feld nicht versehentlich sichtbar zu machen.
-- Barrierefreiheit: Das Feld ist mit tabindex="-1" und ohne Label versehen.
-- Caching: Der Zeitstempel wird serverseitig beim Rendern gesetzt. Bei statischem HTML-Caching kann der Zeitstempel in der Vergangenheit liegen – das ist unkritisch, da nur ein Minimum an Sekunden gefordert wird.
-- Kompatibilität: Getestet mit Contao 4.13. Ältere Versionen werden nicht unterstützt.
+Vorgehen:
+- Inhalte → Formulargenerator → gewünschtes Formular öffnen → „Neues Feld“ → als Feldtyp „Zeitbasierter Spam-Schutz“ bzw. „Honeypot-Spam-Schutz“ auswählen → speichern.
+
+Hinweise:
+- Die Feldnamen vergeben Sie wie gewohnt selbst; es gibt keine fest verdrahteten Namen.
+- Der Timestamp-Standardwert beträgt 8 Sekunden. Eine Anpassung ist technisch über ein DCA-Attribut `minTime` am Feld möglich (für fortgeschrittene Nutzer/Entwickler). Das Bundle liefert dafür kein eigenes Backend-Feld.
+
+## Templates und Styling
+- Honeypot verwendet das Template `form_honeypot` (Datei im Bundle vorhanden). Sie können dieses Template wie gewohnt im Theme überschreiben.
+- Das Timestamp-Feld wird als Hidden-Input generiert und benötigt kein eigenes Template.
+- CSS-Klassen:
+  - `.spam-honeypot-wrapper`, `.widget-honeypot`, `.hp-field` (werden per CSS unsichtbar positioniert)
+  - `.widget-timestamp` (ist standardmäßig ausgeblendet)
+
+## Fehlermeldungen (Standard)
+- Zu schnell abgeschickt: „Sie haben das Formular zu schnell abgeschickt. Bitte warten Sie mindestens X Sekunden.“
+- Honeypot gefüllt: „Spamverdacht: Das Formular konnte nicht gesendet werden.“
 
 ## Troubleshooting
-- Formular wird "zu schnell" bemängelt: Passen Sie den Wert "Zeit in Sekunden" im Formular an.
-- Häufige Honeypot-Auslöser: Prüfen Sie, ob benutzerdefiniertes JavaScript/CSS das Feld "hp_field" beeinflusst.
-- Keine neuen Felder sichtbar: Die Felder werden automatisch beim Rendern eingefügt. Im Frontend-HTML sollten Sie "form_start_timestamp" und "hp_field" sehen (hp_field ist versteckt).
+- Formular wird „zu schnell“ bemängelt: Warten Sie beim Testen mindestens 8 Sekunden, bevor Sie absenden. Eine Anpassung der Mindestzeit ist per DCA-Attribut `minTime` möglich (Entwickleranpassung).
+- Häufige Honeypot-Auslöser: Prüfen Sie, ob eigenes JavaScript/CSS das Feld (Klasse `.hp-field`) befüllt oder sichtbar macht.
+- CSS nicht geladen: Prüfen Sie, ob die Datei `bundles/contaosimplespamtrap/css/spam-trap.css` öffentlich erreichbar ist (Front-end Asset-Pipeline/Cache leeren).
+
+## Kompatibilität
+Getestet mit Contao 4.13 LTS.
 
 ## Lizenz
 LGPL-3.0-or-later
