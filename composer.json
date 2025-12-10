@@ -1,0 +1,24 @@
+{
+  "name": "solidwork/contao-simple-spam-trap-bundle",
+  "description": "Contao time-delay and honeypot spam protection for forms.",
+  "type": "contao-bundle",
+  "license": "LGPL-3.0-or-later",
+  "require": {
+    "php": "^7.4 || ^8.0",
+    "contao/core-bundle": "^4.13"
+  },
+  "autoload": {
+    "psr-4": {
+      "SolidWork\\ContaoSimpleSpamTrapBundle\\": "src/"
+    }
+  },
+  "extra": {
+    "contao-manager-plugin": "SolidWork\\ContaoSimpleSpamTrapBundle\\ContaoManager\\Plugin"
+  },
+  "config": {
+    "allow-plugins": {
+      "contao-components/installer": true,
+      "contao/manager-plugin": true
+    }
+  }
+}
